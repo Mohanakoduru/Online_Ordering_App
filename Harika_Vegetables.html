@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Harika Vegetables</title>
+<link id="pwa-manifest" rel="manifest">
+<meta name="theme-color" content="#2e7d32">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{--green:#2e7d32;--light:#f1f8e9;--muted:#757575;--card:#fff;--border:#e0e0e0;--red:#c62828;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;min-height:100vh;}
+/* HEADER */
+.hdr{background:var(--green);color:#fff;padding:12px 14px 10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.hdr-row{display:flex;align-items:center;gap:8px;}
+.shop-info{flex:1;min-width:0;}
+.shop-name{font-size:1.15rem;font-weight:700;line-height:1.2;}
+.shop-tag{font-size:.72rem;opacity:.85;margin-top:1px;}
+.hdr-btns{display:flex;gap:6px;flex-shrink:0;}
+.hbtn{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:20px;padding:6px 12px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.hbtn.cart-btn{position:relative;}
+.cart-badge{position:absolute;top:-6px;right:-6px;background:#ff6f00;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.install-btn{display:none;animation:pulse 2s infinite;}
+.install-btn.show{display:flex;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+.gear-btn{background:none;border:none;color:rgba(255,255,255,.8);font-size:1.3rem;cursor:pointer;padding:4px;}
+/* SYNC STATUS BAR */
+#sync-bar{display:none;padding:6px 14px;font-size:.72rem;font-weight:600;text-align:center;}
+/* SEARCH + CATS */
+.search-wrap{padding:10px 12px 6px;background:#fff;border-bottom:1px solid var(--border);}
+.search-box{width:100%;padding:9px 14px 9px 36px;border:1.5px solid #ddd;border-radius:24px;font-size:.88rem;background:#f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.868-3.833zm-5.242 1.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E") no-repeat 12px center;outline:none;}
+.cat-bar{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;scrollbar-width:none;background:#fff;border-bottom:1px solid var(--border);}
+.cat-bar::-webkit-scrollbar{display:none;}
+.cat-pill{background:#f0f4f0;border:1.5px solid #ddd;color:#444;border-radius:20px;padding:5px 12px;font-size:.74rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.cat-pill.active{background:var(--green);border-color:var(--green);color:#fff;}
+/* PRODUCTS */
+.prod-section{padding:10px 10px 80px;}
+.sec-title{font-size:.82rem;font-weight:700;color:var(--green);padding:4px 2px 8px;display:flex;align-items:center;gap:6px;}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pcard{background:#fff;border-radius:14px;padding:12px 10px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.07);border:2px solid transparent;transition:border-color .2s;}
+.pcard.in-cart{border-color:var(--green);}
+.pcard.oos{opacity:.55;}
+.p-emoji{font-size:2.4rem;display:block;margin-bottom:4px;}
+.p-en{font-size:.85rem;font-weight:700;color:#222;margin-bottom:1px;}
+.p-te{font-size:.75rem;color:#666;margin-bottom:4px;}
+.p-price{font-size:.82rem;font-weight:700;color:var(--green);margin-bottom:8px;}
+.p-unit{font-size:.68rem;font-weight:400;color:var(--muted);}
+.qty-ctrl{display:flex;align-items:center;justify-content:center;gap:8px;}
+.qbtn{width:30px;height:30px;border-radius:50%;border:none;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.qbtn.minus{background:#f5f5f5;color:#555;}
+.qbtn:not(.minus){background:var(--green);color:#fff;}
+.qdis{font-size:.9rem;font-weight:700;min-width:20px;}
+.oos-badge{font-size:.68rem;color:var(--red);font-weight:600;padding:4px 0;}
+/* MODALS */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.mov.open{display:flex;}
+.modal{background:#fff;width:100%;max-width:520px;max-height:92vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;}
+.modal.sm{border-radius:16px;margin:16px;max-height:88vh;}
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.mhdr h2{font-size:1rem;font-weight:700;}
+.xbtn{background:none;border:none;font-size:1.3rem;cursor:pointer;color:#999;padding:2px 6px;}
+.mbody{overflow-y:auto;flex:1;padding:12px 14px 20px;}
+/* TABS */
+.tabs{display:flex;gap:4px;padding:0 0 10px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.tabs::-webkit-scrollbar{display:none;}
+.tb{background:#f0f4f0;border:1.5px solid #ddd;border-radius:16px;padding:5px 10px;font-size:.72rem;font-weight:600;cursor:pointer;white-space:nowrap;color:#555;}
+.tb.active{background:var(--green);border-color:var(--green);color:#fff;}
+.tc{display:none;}
+.tc.active{display:block;}
+/* FORM ELEMENTS */
+.fg{margin-bottom:10px;}
+.fg label{display:block;font-size:.74rem;font-weight:600;color:#555;margin-bottom:4px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 11px;border:1.5px solid #ddd;border-radius:10px;font-size:.85rem;outline:none;background:#fafafa;}
+.fg input:focus,.fg select:focus{border-color:var(--green);background:#fff;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.save-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:12px;padding:11px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:6px;}
+.out-btn{width:100%;background:#fff;color:#c62828;border:1.5px solid #c62828;border-radius:12px;padding:10px;font-size:.85rem;font-weight:700;cursor:pointer;margin-top:6px;}
+.loc-btn{width:100%;background:#e3f2fd;color:#1565c0;border:1.5px solid #90caf9;border-radius:12px;padding:10px;font-size:.84rem;font-weight:700;cursor:pointer;margin-top:4px;}
+.divider{border:none;border-top:1px solid #eee;margin:12px 0;}
+.sec-lbl{font-size:.76rem;font-weight:700;color:#555;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+/* PRODUCT LIST */
+.pl-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0f0;}
+.pl-em{font-size:1.5rem;flex-shrink:0;}
+.pl-inf{flex:1;min-width:0;}
+.pl-inf strong{font-size:.82rem;}
+.pl-te{font-size:.72rem;color:#777;}
+.pl-pr{font-size:.72rem;color:var(--green);font-weight:600;}
+.edt-b,.del-b{border:none;background:none;cursor:pointer;font-size:1rem;padding:4px;}
+.avail-tog{border:none;border-radius:10px;font-size:.7rem;font-weight:700;cursor:pointer;padding:5px 8px;}
+.avail-tog.on{background:#e8f5e9;color:#2e7d32;}
+.avail-tog.off{background:#ffebee;color:#c62828;}
+/* MASTER GRID */
+.master-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;}
+.mg-item{background:#fafafa;border:1.5px solid #eee;border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;position:relative;}
+.mg-item.added{background:#e8f5e9;border-color:#a5d6a7;}
+.mg-em{font-size:1.4rem;display:block;}
+.mg-en{font-size:.64rem;font-weight:600;color:#333;margin-top:2px;}
+.mg-te{font-size:.58rem;color:#888;}
+.mg-added-badge{position:absolute;top:2px;right:3px;font-size:.52rem;color:#2e7d32;font-weight:700;}
+/* SUGGEST BOX */
+.sug-box{position:absolute;left:0;right:0;top:100%;background:#fff;border:1.5px solid #ddd;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:50;display:none;max-height:180px;overflow-y:auto;}
+.sug-item{padding:8px 10px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:.82rem;border-bottom:1px solid #f5f5f5;}
+.sug-item:hover{background:#f9fbe7;}
+.sug-te{font-size:.72rem;color:#888;}
+/* CART MODAL */
+.cart-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f5f5f5;}
+.ci-em{font-size:1.4rem;flex-shrink:0;}
+.ci-inf{flex:1;min-width:0;}
+.ci-en{font-size:.84rem;font-weight:700;}
+.ci-te{font-size:.72rem;color:#888;}
+.ci-right{text-align:right;}
+.ci-price{font-size:.8rem;font-weight:700;color:var(--green);}
+.ci-ctrl{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:4px;}
+.ci-qbtn{width:24px;height:24px;border-radius:50%;border:none;font-size:.9rem;font-weight:700;cursor:pointer;}
+.ci-qbtn.m{background:#f5f5f5;color:#555;}
+.ci-qbtn.p{background:var(--green);color:#fff;}
+.ci-qdis{font-size:.82rem;font-weight:700;min-width:18px;text-align:center;}
+.cart-totals{margin-top:12px;background:#f9fbe7;border-radius:12px;padding:10px 14px;}
+.ct-row{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;}
+.ct-row.total{font-weight:700;font-size:.9rem;color:var(--green);border-top:1px dashed #c8e6c9;padding-top:6px;margin-top:4px;}
+.checkout-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:14px;padding:13px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:10px;}
+/* LOCATION SCREEN */
+.loc-screen{padding:24px 16px;text-align:center;}
+.loc-icon{font-size:3rem;margin-bottom:12px;}
+.loc-title{font-size:1rem;font-weight:700;margin-bottom:6px;}
+.loc-sub{font-size:.8rem;color:var(--muted);margin-bottom:16px;line-height:1.5;}
+.loc-btn-big{background:var(--green);color:#fff;border:none;border-radius:14px;padding:13px 28px;font-size:.95rem;font-weight:700;cursor:pointer;width:100%;}
+.loc-err{padding:20px 16px;text-align:center;}
+/* CHECKOUT FORM */
+.cf-section{margin-bottom:12px;}
+.cf-title{font-size:.78rem;font-weight:700;color:#555;margin-bottom:6px;text-transform:uppercase;}
+.del-info{background:#e8f5e9;border-radius:10px;padding:10px 12px;font-size:.8rem;margin-bottom:10px;}
+.del-info strong{color:var(--green);}
+/* INSTALL MODAL */
+.inst-step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;}
+.inst-num{background:var(--green);color:#fff;border-radius:50%;width:24px;height:24px;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.inst-text{font-size:.82rem;line-height:1.4;}
+/* ADMIN LOGIN */
+#adm-err{color:var(--red);font-size:.76rem;display:none;margin-bottom:8px;}
+/* APFORM */
+.apf{margin-top:10px;background:#fafafa;border-radius:12px;padding:12px;}
+.apf h4{font-size:.82rem;font-weight:700;margin-bottom:10px;}
+/* Firebase info box */
+.fb-info{font-size:.76rem;color:var(--muted);background:#f9fbe7;border-radius:10px;padding:12px;line-height:1.7;margin-top:10px;}
+.fb-info b{color:#333;}
+.fb-info code{background:#e8f5e9;padding:1px 5px;border-radius:4px;font-size:.72rem;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-row">
+    <div class="shop-info">
+      <div class="shop-name" id="sn">⏳ Loading…</div>
+      <div class="shop-tag"  id="st">Please wait</div>
+    </div>
+    <div class="hdr-btns">
+      <button class="hbtn cart-btn" onclick="openCart()">🛒 Cart <span class="cart-badge" id="cc">0</span></button>
+      <button class="hbtn install-btn" id="install-btn" onclick="triggerInstall()">📲 Install</button>
+      <button class="gear-btn" onclick="openAdmModal()">⚙️</button>
+    </div>
+  </div>
+</div>
+<div id="sync-bar"></div>
+
+<!-- SEARCH + CATS -->
+<div class="search-wrap">
+  <input class="search-box" id="srch" type="text" placeholder="Search English or Telugu / తెలుగులో వెతకండి" oninput="filterProds()">
+</div>
+<div class="cat-bar" id="cat-bar"></div>
+
+<!-- PRODUCTS -->
+<div class="prod-section">
+  <div class="sec-title" id="ptitle">🥦 All Vegetables / అన్ని కూరగాయలు</div>
+  <div class="pgrid" id="pgrid"></div>
+</div>
+
+<!-- ═══ CART MODAL ═══ -->
+<div class="mov" id="cart-modal">
+  <div class="modal">
+    <div class="mhdr"><h2>🛒 Your Cart / మీ కార్ట్</h2><button class="xbtn" onclick="closeCart()">✕</button></div>
+    <div class="mbody" id="cart-body"></div>
+  </div>
+</div>
+
+<!-- ═══ LOCATION MODAL ═══ -->
+<div class="mov" id="loc-modal">
+  <div class="modal">
+    <div class="mhdr"><h2>📍 Share Location</h2><button class="xbtn" onclick="document.getElementById('loc-modal').classList.remove('open')">✕</button></div>
+    <div class="mbody" id="loc-body"></div>
+  </div>
+</div>
+
+<!-- ═══ CHECKOUT MODAL ═══ -->
+<div class="mov" id="checkout-modal">
+  <div class="modal">
+    <div class="mhdr"><h2>📋 Order Details</h2><button class="xbtn" onclick="document.getElementById('checkout-modal').classList.remove('open')">✕</button></div>
+    <div class="mbody" id="checkout-body"></div>
+  </div>
+</div>
+
+<!-- ═══ INSTALL MODAL ═══ -->
+<div class="mov" id="install-modal">
+  <div class="modal sm">
+    <div class="mhdr"><h2>📲 Install App</h2><button class="xbtn" onclick="closeInstallModal()">✕</button></div>
+    <div class="mbody">
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">Install this app on your phone for quick access!</p>
+      <button class="save-btn" id="native-install-btn" style="display:none;margin-bottom:10px" onclick="doNativeInstall()">⬇️ Install Now (1 tap)</button>
+      <div class="inst-step"><span class="inst-num">1</span><span class="inst-text">Open this page in <b>Chrome</b> browser on Android, or <b>Safari</b> on iPhone.</span></div>
+      <div class="inst-step"><span class="inst-num">2</span><span class="inst-text">Tap the <b>⋮ menu</b> (Android) or <b>Share button</b> (iPhone) at the top right.</span></div>
+      <div class="inst-step"><span class="inst-num">3</span><span class="inst-text">Tap <b>"Add to Home Screen"</b> / <b>"Install App"</b>.</span></div>
+      <div class="inst-step"><span class="inst-num">4</span><span class="inst-text">Tap <b>Add</b> — the app icon will appear on your home screen!</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN LOGIN MODAL ═══ -->
+<div class="mov" id="adm-modal">
+  <div class="modal sm">
+    <div class="mhdr"><h2>🔐 Admin Login</h2><button class="xbtn" onclick="closeAdmModal()">✕</button></div>
+    <div class="mbody">
+      <p id="adm-err">❌ Incorrect ID or password</p>
+      <div class="fg"><label>Admin ID</label><input type="text" id="ai" placeholder="admin"></div>
+      <div class="fg"><label>Password</label><input type="password" id="ap" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="save-btn" onclick="doLogin()">🔓 Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS MODAL ═══ -->
+<div class="mov" id="set-modal">
+  <div class="modal sm">
+    <div class="mhdr"><h2>⚙️ Admin Settings</h2><button class="xbtn" onclick="closeSettings()">✕</button></div>
+    <div class="mbody">
+      <div class="tabs">
+        <button class="tb active" id="tb-shop"  onclick="switchTab('shop',this)">🏪 Shop</button>
+        <button class="tb"        id="tb-loc"   onclick="switchTab('loc',this)">📍 Location</button>
+        <button class="tb"        id="tb-prods" onclick="switchTab('prods',this)">🥦 Products</button>
+        <button class="tb"        id="tb-sec"   onclick="switchTab('sec',this)">🔐 Security</button>
+        <button class="tb"        id="tb-fb"    onclick="switchTab('fb',this)">🔥 Sync</button>
+      </div>
+
+      <!-- SHOP -->
+      <div class="tc active" id="tc-shop">
+        <div class="fg"><label>Shop Name</label><input id="ss-name" type="text" placeholder="Harika Vegetables"></div>
+        <div class="fg"><label>Tagline</label><input id="ss-tag" type="text" placeholder="Daily Fresh • Home Delivery"></div>
+        <div class="fg"><label>WhatsApp Number (with country code)</label><input id="ss-wa" type="tel" placeholder="919876543210"></div>
+        <div class="fg"><label>Delivery Note</label><input id="ss-del" type="text" placeholder="Free delivery ≤1.5 km"></div>
+        <button class="save-btn" onclick="saveShop()">💾 Save</button>
+        <button class="out-btn"  onclick="doLogout()">🔒 Lock Admin</button>
+      </div>
+
+      <!-- LOCATION -->
+      <div class="tc" id="tc-loc">
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:10px">Set your shop location to calculate delivery charges automatically.</p>
+        <div class="fg"><label>Shop Landmark / Address</label><input id="sl-mark" type="text" placeholder="Near Ramesh Rice Mill, Main Road"></div>
+        <div class="fg"><label>Latitude, Longitude (from Google Maps)</label><input id="sl-coord" type="text" placeholder="16.5062, 80.6480"></div>
+        <button class="loc-btn" onclick="useMyLocForShop()">📍 Use My Current Location</button>
+        <p id="sl-status" style="font-size:.74rem;color:var(--green);margin-top:6px"></p>
+        <hr class="divider">
+        <p style="font-size:.78rem;margin-bottom:8px">🆓 Free delivery within <b>1.5 km</b> · ₹10/km beyond.</p>
+        <button class="save-btn" onclick="saveLoc()">💾 Save Location</button>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="tc" id="tc-prods">
+        <div class="sec-lbl">Your Products</div>
+        <div id="pl-list"></div>
+        <hr class="divider">
+        <div class="sec-lbl">Add from Master List / పూర్తి జాబితా</div>
+        <p style="font-size:.72rem;color:var(--muted);margin-bottom:6px">Tap to add/remove. Green = already added.</p>
+        <div class="master-grid" id="mgrid"></div>
+        <hr class="divider">
+        <div class="apf">
+          <h4 id="apf-title">➕ Add Custom Item</h4>
+          <input type="hidden" id="ei" value="-1">
+          <div class="fg" style="position:relative;margin-bottom:4px">
+            <label>Search name (English or Telugu)</label>
+            <input type="text" id="pns" placeholder="Tomato or టమాటా" oninput="onPnSearch(this.value)" autocomplete="off">
+            <div class="sug-box" id="sug-box"></div>
+          </div>
+          <div class="form-row">
+            <div class="fg"><label>Emoji</label><input type="text" id="pe" placeholder="🥬" maxlength="4"></div>
+            <div class="fg"><label>Unit</label><input type="text" id="pu" placeholder="/kg"></div>
+          </div>
+          <div class="form-row">
+            <div class="fg"><label>English Name</label><input type="text" id="pen" placeholder="Tomato"></div>
+            <div class="fg"><label>Telugu / తెలుగు</label><input type="text" id="pte" placeholder="టమాటా"></div>
+          </div>
+          <div class="fg"><label>Price (₹)</label><input type="number" id="pp" placeholder="40" min="0" style="max-width:130px"></div>
+          <button class="save-btn" id="sp-btn" onclick="saveProduct()">➕ Add Product</button>
+        </div>
+      </div>
+
+      <!-- SECURITY -->
+      <div class="tc" id="tc-sec">
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:10px">Change admin credentials. These sync to all devices via Firebase.</p>
+        <div class="fg"><label>New Admin ID</label><input type="text" id="sc-id" placeholder="New ID"></div>
+        <div class="fg"><label>Current Password (required)</label><input type="password" id="sc-cur" placeholder="Current password"></div>
+        <div class="fg"><label>New Password</label><input type="password" id="sc-new" placeholder="Min 4 characters"></div>
+        <div class="fg"><label>Confirm New Password</label><input type="password" id="sc-con" placeholder="Repeat new password"></div>
+        <p id="sc-err" style="color:#c62828;font-size:.74rem;display:none;margin-bottom:6px"></p>
+        <p id="sc-ok"  style="color:#2e7d32;font-size:.74rem;display:none;margin-bottom:6px"></p>
+        <button class="save-btn" onclick="saveSecurity()">🔐 Update Credentials</button>
+      </div>
+
+      <!-- FIREBASE SYNC -->
+      <div class="tc" id="tc-fb">
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:10px">Firebase makes your changes appear on <b>all devices instantly</b> — phone, laptop, everyone.</p>
+        <div id="fb-status-bar" style="font-size:.76rem;padding:9px 12px;border-radius:8px;margin-bottom:10px;display:none;font-weight:600"></div>
+        <div class="fg"><label>Firebase Database URL</label><input type="url" id="fb-url" placeholder="https://your-project-default-rtdb.firebaseio.com"></div>
+        <button class="save-btn" onclick="saveFirebaseUrl()">🔥 Connect &amp; Sync</button>
+        <button class="out-btn" style="margin-top:6px" onclick="disconnectFirebase()">❌ Disconnect</button>
+        <div class="fb-info">
+          <b>📋 Free Setup (5 min):</b><br>
+          1. Open <b>console.firebase.google.com</b><br>
+          2. Add project → any name → Continue<br>
+          3. Build → <b>Realtime Database</b> → Create Database<br>
+          4. Choose region → <b>Start in test mode</b> → Enable<br>
+          5. Copy the URL → paste above → Connect!<br><br>
+          <b style="color:#2e7d32">✅ Your URL is already set.</b> Upload this file to Netlify and all devices will sync automatically!
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  MASTER VEGETABLE DATABASE (65 items)
+// ══════════════════════════════════════════════
+const MASTER = [
+  {e:'🍅',en:'Tomato',te:'టమాటా',p:40,u:'/kg',c:'common'},
+  {e:'🥔',en:'Potato',te:'బంగాళాదుంప',p:30,u:'/kg',c:'common'},
+  {e:'🍆',en:'Brinjal',te:'వంకాయ',p:35,u:'/kg',c:'common'},
+  {e:'🫑',en:'Capsicum',te:'క్యాప్సికం',p:60,u:'/kg',c:'common'},
+  {e:'🥦',en:'Cauliflower',te:'కాలీఫ్లవర్',p:50,u:'/piece',c:'common'},
+  {e:'🥬',en:'Cabbage',te:'క్యాబేజీ',p:30,u:'/kg',c:'common'},
+  {e:'🥒',en:'Cucumber',te:'దోసకాయ',p:30,u:'/kg',c:'common'},
+  {e:'🌽',en:'Corn',te:'మొక్కజొన్న',p:15,u:'/piece',c:'common'},
+  {e:'🧄',en:'Garlic',te:'వెల్లుల్లి',p:120,u:'/kg',c:'common'},
+  {e:'🫚',en:'Ginger',te:'అల్లం',p:80,u:'/kg',c:'common'},
+  {e:'🧅',en:'Onion',te:'ఉల్లిపాయ',p:40,u:'/kg',c:'onion'},
+  {e:'🧅',en:'Small Onion',te:'చిన్న ఉల్లి',p:60,u:'/kg',c:'onion'},
+  {e:'🧅',en:'Spring Onion',te:'పచ్చి ఉల్లి',p:30,u:'/bunch',c:'onion'},
+  {e:'🌶️',en:'Red Chilli',te:'ఎర్ర మిర్చి',p:80,u:'/kg',c:'chilli'},
+  {e:'🌿',en:'Green Chilli',te:'పచ్చి మిర్చి',p:40,u:'/kg',c:'chilli'},
+  {e:'🫑',en:'Banana Pepper',te:'బనానా మిర్చి',p:50,u:'/kg',c:'chilli'},
+  {e:'🌿',en:'Spinach',te:'పాలకూర',p:20,u:'/bunch',c:'leafy'},
+  {e:'🌿',en:'Methi Leaves',te:'మెంతికూర',p:15,u:'/bunch',c:'leafy'},
+  {e:'🌿',en:'Coriander',te:'కొత్తిమీర',p:10,u:'/bunch',c:'leafy'},
+  {e:'🌿',en:'Curry Leaves',te:'కరివేపాకు',p:10,u:'/bunch',c:'leafy'},
+  {e:'🌿',en:'Mint Leaves',te:'పుదీనా',p:10,u:'/bunch',c:'leafy'},
+  {e:'🌿',en:'Dill Leaves',te:'సోపు కూర',p:15,u:'/bunch',c:'leafy'},
+  {e:'🌿',en:'Amaranth',te:'తోటకూర',p:15,u:'/bunch',c:'leafy'},
+  {e:'🌿',en:'Drumstick Leaves',te:'మునగాకు',p:20,u:'/bunch',c:'leafy'},
+  {e:'🥕',en:'Carrot',te:'క్యారెట్',p:40,u:'/kg',c:'root'},
+  {e:'🌰',en:'Beetroot',te:'బీట్రూట్',p:35,u:'/kg',c:'root'},
+  {e:'🥔',en:'Sweet Potato',te:'చిలగడ దుంప',p:40,u:'/kg',c:'root'},
+  {e:'🌿',en:'Radish',te:'మూలంగి',p:25,u:'/kg',c:'root'},
+  {e:'🌿',en:'Tapioca',te:'చేమ దుంప',p:30,u:'/kg',c:'root'},
+  {e:'🌿',en:'Elephant Yam',te:'కర్ర పెండలం',p:45,u:'/kg',c:'root'},
+  {e:'🎃',en:'Pumpkin',te:'గుమ్మడికాయ',p:25,u:'/kg',c:'gourd'},
+  {e:'🥒',en:'Bottle Gourd',te:'సొరకాయ',p:20,u:'/piece',c:'gourd'},
+  {e:'🥒',en:'Ridge Gourd',te:'బీరకాయ',p:25,u:'/kg',c:'gourd'},
+  {e:'🥒',en:'Snake Gourd',te:'పొట్లకాయ',p:25,u:'/kg',c:'gourd'},
+  {e:'🥒',en:'Bitter Gourd',te:'కాకరకాయ',p:40,u:'/kg',c:'gourd'},
+  {e:'🥒',en:'Ash Gourd',te:'బుడమ కాకర',p:20,u:'/kg',c:'gourd'},
+  {e:'🥒',en:'Ivy Gourd',te:'దొండకాయ',p:30,u:'/kg',c:'gourd'},
+  {e:'🥒',en:'Tinda',te:'తిండా',p:30,u:'/kg',c:'gourd'},
+  {e:'🫘',en:'Broad Beans',te:'అనుమతి చిక్కుళ్ళు',p:50,u:'/kg',c:'bean'},
+  {e:'🫘',en:'French Beans',te:'ఫ్రెంచ్ బీన్స్',p:60,u:'/kg',c:'bean'},
+  {e:'🫘',en:'Cluster Beans',te:'గోరుచిక్కుళ్ళు',p:40,u:'/kg',c:'bean'},
+  {e:'🫘',en:'Green Peas',te:'పచ్చి బఠాణీ',p:60,u:'/kg',c:'bean'},
+  {e:'🫘',en:'Cowpea',te:'అలసందలు',p:50,u:'/kg',c:'bean'},
+  {e:'🫘',en:'Hyacinth Bean',te:'చిక్కుడు కాయ',p:40,u:'/kg',c:'bean'},
+  {e:'🌿',en:'Drumstick',te:'మునగకాయ',p:30,u:'/piece',c:'other'},
+  {e:'🌿',en:'Raw Banana',te:'పచ్చి అరటికాయ',p:25,u:'/piece',c:'other'},
+  {e:'🌿',en:'Raw Papaya',te:'పచ్చి బొప్పాయి',p:20,u:'/kg',c:'other'},
+  {e:'🌿',en:'Raw Mango',te:'పచ్చి మామిడికాయ',p:40,u:'/kg',c:'other'},
+  {e:'🌿',en:'Jackfruit',te:'పనస కాయ',p:30,u:'/kg',c:'other'},
+  {e:'🍄',en:'Mushroom',te:'పుట్టగొడుగులు',p:80,u:'/kg',c:'other'},
+  {e:'🌿',en:'Colocasia',te:'చేమ కాయ',p:35,u:'/kg',c:'other'},
+  {e:'🌿',en:'Suran',te:'కంద',p:40,u:'/kg',c:'other'},
+  {e:'🌿',en:'Lotus Stem',te:'తామర కాయ',p:60,u:'/kg',c:'other'},
+  {e:'🥬',en:'Broccoli',te:'బ్రాకలీ',p:80,u:'/piece',c:'common'},
+  {e:'🌿',en:'Celery',te:'సెలెరీ',p:60,u:'/bunch',c:'leafy'},
+  {e:'🌿',en:'Lettuce',te:'లెట్యూస్',p:40,u:'/piece',c:'leafy'},
+  {e:'🌿',en:'Fenugreek Sprouts',te:'మెంతి మొలకలు',p:20,u:'/bunch',c:'leafy'},
+  {e:'🥕',en:'Baby Carrot',te:'చిన్న క్యారెట్',p:60,u:'/kg',c:'root'},
+  {e:'🌿',en:'Turnip',te:'టర్నిప్',p:30,u:'/kg',c:'root'},
+  {e:'🥒',en:'Zucchini',te:'జుకినీ',p:60,u:'/kg',c:'gourd'},
+  {e:'🫘',en:'Snow Peas',te:'స్నో పీస్',p:80,u:'/kg',c:'bean'},
+  {e:'🌿',en:'Okra / Lady finger',te:'బెండకాయ',p:30,u:'/kg',c:'common'},
+  {e:'🌿',en:'Taro Root',te:'అరబి',p:40,u:'/kg',c:'root'},
+  {e:'🌿',en:'Waterchestnut',te:'సింఘారా',p:50,u:'/kg',c:'other'},
+  {e:'🌿',en:'Kohlrabi',te:'నవల్ కోల్',p:40,u:'/kg',c:'other'},
+  {e:'🌿',en:'Leek',te:'లీక్',p:50,u:'/bunch',c:'onion'},
+];
+
+const CATS = [
+  {id:'all',    label:'All / అన్నీ'},
+  {id:'common', label:'Common / సాధారణ'},
+  {id:'onion',  label:'Onion / ఉల్లి'},
+  {id:'chilli', label:'Chilli / మిర్చి'},
+  {id:'leafy',  label:'Leafy / ఆకు కూరలు'},
+  {id:'root',   label:'Roots / దుంపలు'},
+  {id:'gourd',  label:'Gourds / కాయలు'},
+  {id:'bean',   label:'Beans / పప్పు'},
+  {id:'other',  label:'Others / ఇతర'},
+];
+
+// ══════════════════════════════════════════════
+//  FIREBASE CONFIG — hard-coded for auto-sync
+// ══════════════════════════════════════════════
+const FB_URL = 'https://harika-vegetables-default-rtdb.firebaseio.com';
+
+// ══════════════════════════════════════════════
+//  DEFAULT SETTINGS
+// ══════════════════════════════════════════════
+const DS = {
+  shopName:'🌿 Harika Vegetables',
+  tagline:'Daily Fresh • Home Delivery',
+  whatsapp:'',
+  deliveryNote:'Free delivery ≤1.5 km • ₹10/km beyond',
+  shopLat:null, shopLng:null, shopLandmark:'',
+  adminId:'admin', adminPassword:'1234',
+  firebaseUrl: FB_URL,
+  _v: 1,
+};
+
+let S = { ...DS, ...(JSON.parse(localStorage.getItem('veg_s3')||'null')||{}) };
+let P = JSON.parse(localStorage.getItem('veg_p3')||'null') || MASTER.map(m=>({...m}));
+let cart = {};
+let custLoc = null;
+let activeCat = 'all';
+
+// ══════════════════════════════════════════════
+//  LOCAL SAVE
+// ══════════════════════════════════════════════
+function save() {
+  localStorage.setItem('veg_s3', JSON.stringify(S));
+  localStorage.setItem('veg_p3', JSON.stringify(P));
+}
+
+// ══════════════════════════════════════════════
+//  FIREBASE HELPERS
+// ══════════════════════════════════════════════
+function fbBase() { return (S.firebaseUrl || FB_URL).replace(/\/+$/,''); }
+
+async function fbWrite(path, data) {
+  try {
+    await fetch(fbBase()+'/'+path+'.json', {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+  } catch(e) { console.warn('fbWrite failed', e); }
+}
+
+async function fbRead(path) {
+  try {
+    const r = await fetch(fbBase()+'/'+path+'.json');
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+// Sync EVERYTHING including admin credentials
+async function syncToFirebase() {
+  if (location.protocol==='file:') return;
+  await Promise.all([
+    fbWrite('settings', S),
+    fbWrite('products', P)
+  ]);
+}
+
+async function loadFromFirebase() {
+  if (location.protocol==='file:') return false;
+  const [settings, products] = await Promise.all([
+    fbRead('settings'), fbRead('products')
+  ]);
+  let loaded = false;
+  if (settings && typeof settings==='object') {
+    // Keep local firebaseUrl if Firebase one is missing
+    S = { ...DS, ...settings, firebaseUrl: S.firebaseUrl || FB_URL };
+    loaded = true;
+  }
+  if (Array.isArray(products) && products.length) {
+    P = products;
+    loaded = true;
+  }
+  return loaded;
+}
+
+// ══════════════════════════════════════════════
+//  SYNC STATUS BAR
+// ══════════════════════════════════════════════
+function showSyncBar(msg, color) {
+  const bar = document.getElementById('sync-bar');
+  bar.style.display='block';
+  bar.style.background = color==='green'?'#e8f5e9':color==='red'?'#ffebee':'#fff3e0';
+  bar.style.color = color==='green'?'#2e7d32':color==='red'?'#c62828':'#e65100';
+  bar.textContent = msg;
+  if (color==='green') setTimeout(()=>{ bar.style.display='none'; }, 3000);
+}
+
+// ══════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════
+async function init() {
+  // Always try Firebase first (so mobile always gets latest)
+  if (location.protocol !== 'file:') {
+    showSyncBar('⏳ Loading latest data…', 'orange');
+    try {
+      const loaded = await loadFromFirebase();
+      if (loaded) {
+        save();
+        showSyncBar('✅ Live data loaded', 'green');
+      } else {
+        // First time — push local data to Firebase
+        await syncToFirebase();
+        showSyncBar('✅ Connected to Firebase', 'green');
+      }
+    } catch(e) {
+      showSyncBar('⚠️ Offline mode — showing cached data', 'orange');
+    }
+  }
+  document.getElementById('sn').textContent = S.shopName;
+  document.getElementById('st').textContent = S.tagline;
+  buildCatBar();
+  renderProds();
+  updateCC();
+}
+
+// ══════════════════════════════════════════════
+//  CATEGORY BAR
+// ══════════════════════════════════════════════
+function buildCatBar() {
+  document.getElementById('cat-bar').innerHTML = CATS.map(c=>
+    `<button class="cat-pill${c.id===activeCat?' active':''}" onclick="setCat('${c.id}')">${c.label}</button>`
+  ).join('');
+}
+function setCat(id) {
+  activeCat = id;
+  buildCatBar();
+  renderProds();
+  const cat = CATS.find(c=>c.id===id);
+  document.getElementById('ptitle').textContent =
+    id==='all' ? '🥦 All Vegetables / అన్ని కూరగాయలు' : cat.label;
+}
+
+// ══════════════════════════════════════════════
+//  PRODUCTS
+// ══════════════════════════════════════════════
+function filterProds() { renderProds(); }
+function renderProds() {
+  const q = document.getElementById('srch').value.trim().toLowerCase();
+  let list = activeCat==='all' ? P : P.filter(p=>p.c===activeCat);
+  if (q) list = list.filter(p=>p.en.toLowerCase().includes(q)||(p.te&&p.te.includes(document.getElementById('srch').value.trim())));
+  const grid = document.getElementById('pgrid');
+  if (!list.length) { grid.innerHTML='<p style="color:var(--muted);font-size:.84rem;grid-column:1/-1;padding:16px 0">No results / ఏమీ కనుగొనలేదు</p>'; return; }
+  grid.innerHTML='';
+  list.forEach(p=>{
+    const ri = P.indexOf(p);
+    const qty = cart[ri]||0;
+    const avail = p.available!==false;
+    const d = document.createElement('div');
+    d.className = 'pcard'+(qty>0?' in-cart':'')+(!avail?' oos':'');
+    d.innerHTML = `<span class="p-emoji">${p.e}</span>
+      <div class="p-en">${p.en}</div>
+      <div class="p-te">${p.te||''}</div>
+      <div class="p-price">₹${p.p}<span class="p-unit">${p.u}</span></div>
+      ${!avail
+        ? `<div class="oos-badge">❌ Out of Stock / అందుబాటులో లేదు</div>`
+        : `<div class="qty-ctrl">
+            <button class="qbtn minus" onclick="chgQ(${ri},-1)">−</button>
+            <span class="qdis">${qty}</span>
+            <button class="qbtn" onclick="chgQ(${ri},1)">+</button>
+          </div>`
+      }`;
+    grid.appendChild(d);
+  });
+}
+function chgQ(i,d) {
+  if (P[i].available===false) return;
+  const nq = Math.max(0,(cart[i]||0)+d);
+  if (nq===0) delete cart[i]; else cart[i]=nq;
+  updateCC(); renderProds();
+}
+function updateCC() {
+  document.getElementById('cc').textContent = Object.values(cart).reduce((a,b)=>a+b,0);
+}
+function subTotal() { return Object.keys(cart).reduce((s,k)=>s+P[k].p*cart[k],0); }
+
+// ══════════════════════════════════════════════
+//  CART
+// ══════════════════════════════════════════════
+function openCart() {
+  const items = Object.keys(cart);
+  const body  = document.getElementById('cart-body');
+  if (!items.length) { body.innerHTML='<p style="padding:20px;text-align:center;color:var(--muted)">🛒 Cart is empty / కార్ట్ ఖాళీగా ఉంది</p>'; document.getElementById('cart-modal').classList.add('open'); return; }
+  let html = items.map(k=>{
+    const p=P[k]; const qty=cart[k];
+    return `<div class="cart-item">
+      <span class="ci-em">${p.e}</span>
+      <div class="ci-inf"><div class="ci-en">${p.en}</div><div class="ci-te">${p.te||''}</div></div>
+      <div class="ci-right">
+        <div class="ci-price">₹${p.p*qty}</div>
+        <div class="ci-ctrl">
+          <button class="ci-qbtn m" onclick="chgQ(${k},-1);openCart()">−</button>
+          <span class="ci-qdis">${qty}</span>
+          <button class="ci-qbtn p" onclick="chgQ(${k},1);openCart()">+</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  const sub = subTotal();
+  html += `<div class="cart-totals">
+    <div class="ct-row"><span>Subtotal</span><span>₹${sub}</span></div>
+    <div class="ct-row"><span>Delivery</span><span>${S.shopLat?'Calculated after location':'Set shop location'}</span></div>
+    <div class="ct-row total"><span>Total</span><span>₹${sub}+</span></div>
+  </div>
+  <button class="checkout-btn" onclick="closeCart();proceedToCheckout()">🛒 Proceed to Order →</button>`;
+  body.innerHTML = html;
+  document.getElementById('cart-modal').classList.add('open');
+}
+function closeCart() { document.getElementById('cart-modal').classList.remove('open'); }
+
+// ══════════════════════════════════════════════
+//  CHECKOUT FLOW
+// ══════════════════════════════════════════════
+function proceedToCheckout() {
+  const body = document.getElementById('loc-body');
+  body.innerHTML = `<div class="loc-screen">
+    <div class="loc-icon">📍</div>
+    <div class="loc-title">Share Your Location</div>
+    <div class="loc-sub">We need your location to calculate delivery distance and charges.<br>మీ లొకేషన్ షేర్ చేయండి — డెలివరీ చార్జ్ కొలవడానికి.</div>
+    <button class="loc-btn-big" onclick="requestLoc()">📍 Allow Location / లొకేషన్ ఇవ్వండి</button>
+  </div>`;
+  document.getElementById('loc-modal').classList.add('open');
+}
+
+function requestLoc() {
+  const body = document.getElementById('loc-body');
+  body.innerHTML = `<div class="loc-screen"><div class="loc-icon">⏳</div><div class="loc-title">Getting your location…</div><div class="loc-sub">Please allow location access in your browser.</div></div>`;
+  if (!navigator.geolocation) { showLocErr('Location not supported on this device.'); return; }
+  navigator.geolocation.getCurrentPosition(
+    pos => { custLoc = {lat:pos.coords.latitude, lng:pos.coords.longitude}; document.getElementById('loc-modal').classList.remove('open'); showCheckoutForm(); },
+    () => showLocErr()
+  );
+}
+
+function showLocErr() {
+  document.getElementById('loc-body').innerHTML = `<div class="loc-err">
+    <div style="font-size:2.5rem;margin-bottom:10px">🚫</div>
+    <div style="font-weight:700;margin-bottom:6px">Location access denied</div>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Please allow location in browser settings and try again.<br>లొకేషన్ పర్మిషన్ ఇచ్చి మళ్ళీ ప్రయత్నించండి.</p>
+    <button class="loc-btn-big" onclick="requestLoc()">🔄 Try Again</button>
+  </div>`;
+}
+
+function haversine(la1,lo1,la2,lo2) {
+  const R=6371, r=x=>x*Math.PI/180;
+  const a=Math.sin(r(la2-la1)/2)**2+Math.cos(r(la1))*Math.cos(r(la2))*Math.sin(r(lo2-lo1)/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function delivCharge(km) { return km<=1.5 ? 0 : Math.ceil(km-1.5)*10; }
+
+function showCheckoutForm() {
+  const km = (S.shopLat&&custLoc) ? haversine(S.shopLat,S.shopLng,custLoc.lat,custLoc.lng) : null;
+  const dc = km!==null ? delivCharge(km) : 0;
+  const sub = subTotal();
+  const total = sub + dc;
+  const items = Object.keys(cart);
+  let html = `<div class="cf-section">
+    <div class="cf-title">📦 Order Summary</div>`;
+  html += items.map(k=>{
+    const p=P[k];
+    return `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;border-bottom:1px solid #f5f5f5">
+      <span>${p.e} ${p.en} (${p.te||''}) × ${cart[k]}</span>
+      <span style="font-weight:700;color:var(--green)">₹${p.p*cart[k]}</span>
+    </div>`;
+  }).join('');
+  html += `</div>
+  <div class="del-info">
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Subtotal / మొత్తం</span><strong>₹${sub}</strong></div>
+    ${km!==null?`<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Distance</span><strong>${km.toFixed(1)} km</strong></div>`:''}
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Delivery</span><strong>${dc===0?'🆓 Free':'₹'+dc}</strong></div>
+    <div style="display:flex;justify-content:space-between;font-size:.9rem;border-top:1px dashed #c8e6c9;padding-top:6px;margin-top:4px"><span><b>Grand Total</b></span><strong style="color:var(--green);font-size:1rem">₹${total}</strong></div>
+  </div>
+  <div class="cf-section">
+    <div class="cf-title">👤 Your Details</div>
+    <div class="fg"><label>Your Name / మీ పేరు</label><input type="text" id="cust-name" placeholder="Enter your name"></div>
+    <div class="fg"><label>Phone / ఫోన్ నంబర్</label><input type="tel" id="cust-phone" placeholder="Your phone number"></div>
+    <div class="fg"><label>Address / చిరునామా (optional)</label><input type="text" id="cust-addr" placeholder="House no, street"></div>
+  </div>
+  <button class="checkout-btn" onclick="sendOrder(${km?km.toFixed(3):0},${dc},${total})">📲 Send Order via WhatsApp →</button>`;
+  const body = document.getElementById('checkout-body');
+  body.innerHTML = html;
+  document.getElementById('checkout-modal').classList.add('open');
+}
+
+function sendOrder(km,dc,total) {
+  const name  = document.getElementById('cust-name').value.trim();
+  const phone = document.getElementById('cust-phone').value.trim();
+  const addr  = document.getElementById('cust-addr').value.trim();
+  if (!name) { alert('Please enter your name / మీ పేరు నమోదు చేయండి'); return; }
+  const items = Object.keys(cart).map(k=>`  • ${P[k].e} ${P[k].en} (${P[k].te||''}) × ${cart[k]} = ₹${P[k].p*cart[k]}`).join('\n');
+  let msg = `🌿 *New Order — ${S.shopName}*\n\n`;
+  msg += `👤 *Name:* ${name}\n`;
+  if (phone) msg += `📞 *Phone:* ${phone}\n`;
+  if (addr)  msg += `🏠 *Address:* ${addr}\n`;
+  msg += `\n📦 *Items:*\n${items}\n\n`;
+  msg += `💰 *Subtotal:* ₹${subTotal()}\n`;
+  if (km>0) msg += `📏 *Distance:* ${km} km\n`;
+  msg += `🚚 *Delivery:* ${dc===0?'FREE':'₹'+dc}\n`;
+  msg += `💵 *Grand Total:* ₹${total}\n`;
+  if (custLoc) msg += `\n📍 *User Location:* https://maps.google.com/?q=${custLoc.lat},${custLoc.lng}`;
+  const wa = S.whatsapp || '';
+  if (!wa) { alert('Shop WhatsApp not configured yet. Please ask admin to set it in Settings.'); return; }
+  window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`,'_blank');
+  cart={};
+  updateCC();
+  document.getElementById('checkout-modal').classList.remove('open');
+  alert('✅ Order sent! We will confirm soon.\nఆర్డర్ పంపబడింది!');
+}
+
+// ══════════════════════════════════════════════
+//  ADMIN AUTH
+// ══════════════════════════════════════════════
+function openAdmModal() {
+  if (sessionStorage.getItem('adm')==='1') { openSettings(); return; }
+  document.getElementById('adm-err').style.display='none';
+  document.getElementById('ai').value='';
+  document.getElementById('ap').value='';
+  document.getElementById('adm-modal').classList.add('open');
+}
+function closeAdmModal() { document.getElementById('adm-modal').classList.remove('open'); }
+function doLogin() {
+  const id = document.getElementById('ai').value.trim();
+  const pw = document.getElementById('ap').value;
+  if (id===S.adminId && pw===S.adminPassword) {
+    sessionStorage.setItem('adm','1');
+    closeAdmModal(); openSettings();
+  } else {
+    document.getElementById('adm-err').style.display='block';
+    document.getElementById('ap').value='';
+  }
+}
+function doLogout() { sessionStorage.removeItem('adm'); closeSettings(); alert('🔒 Admin locked.'); }
+
+// ══════════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════════
+function openSettings() {
+  document.getElementById('ss-name').value = S.shopName;
+  document.getElementById('ss-tag').value  = S.tagline;
+  document.getElementById('ss-wa').value   = S.whatsapp;
+  document.getElementById('ss-del').value  = S.deliveryNote;
+  document.getElementById('sl-mark').value = S.shopLandmark||'';
+  document.getElementById('sl-coord').value= (S.shopLat&&S.shopLng)?`${S.shopLat},${S.shopLng}`:'';
+  document.getElementById('sl-status').textContent = S.shopLat ? `✅ ${S.shopLat.toFixed(4)}, ${S.shopLng.toFixed(4)}`:'⚠️ Not set';
+  ['sc-id','sc-cur','sc-new','sc-con'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('sc-err').style.display='none';
+  document.getElementById('sc-ok').style.display='none';
+  // Firebase tab
+  document.getElementById('fb-url').value = S.firebaseUrl||FB_URL;
+  const fbar=document.getElementById('fb-status-bar');
+  if (S.firebaseUrl||FB_URL) {
+    fbar.style.display='block';
+    fbar.style.background=location.protocol==='file:'?'#fff3e0':'#e8f5e9';
+    fbar.style.color=location.protocol==='file:'?'#e65100':'#2e7d32';
+    fbar.textContent=location.protocol==='file:'?'⚠️ Open via Netlify for live sync.':'✅ Connected — all changes sync to every device!';
+  } else { fbar.style.display='none'; }
+  switchTab('shop', document.getElementById('tb-shop'));
+  document.getElementById('set-modal').classList.add('open');
+}
+function closeSettings() { document.getElementById('set-modal').classList.remove('open'); }
+
+function switchTab(id,btn) {
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tc-'+id).classList.add('active');
+  if (id==='prods') { renderProdList(); renderMasterGrid(); }
+}
+
+function saveShop() {
+  S.shopName    = document.getElementById('ss-name').value||S.shopName;
+  S.tagline     = document.getElementById('ss-tag').value||S.tagline;
+  S.whatsapp    = document.getElementById('ss-wa').value.replace(/\D/g,'');
+  S.deliveryNote= document.getElementById('ss-del').value;
+  save(); syncToFirebase();
+  document.getElementById('sn').textContent=S.shopName;
+  document.getElementById('st').textContent=S.tagline;
+  alert('✅ Saved & synced!');
+}
+
+function saveLoc() {
+  S.shopLandmark = document.getElementById('sl-mark').value.trim();
+  const raw = document.getElementById('sl-coord').value.trim();
+  const parsed = parseLL(raw);
+  if (parsed) {
+    S.shopLat=parsed.lat; S.shopLng=parsed.lng; save(); syncToFirebase();
+    document.getElementById('sl-status').textContent=`✅ Saved: ${parsed.lat.toFixed(4)}, ${parsed.lng.toFixed(4)}`;
+    alert('✅ Location saved & synced!');
+  } else if (raw) {
+    alert('❌ Invalid format. Use: 16.5062, 80.6480');
+  } else {
+    S.shopLat=null; S.shopLng=null; save(); syncToFirebase();
+    document.getElementById('sl-status').textContent='⚠️ Cleared.';
+  }
+}
+
+function parseLL(t) {
+  if (!t) return null;
+  let m=t.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if(m) return {lat:+m[1],lng:+m[2]};
+  m=t.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
+  if(m) return {lat:+m[1],lng:+m[2]};
+  return null;
+}
+
+function useMyLocForShop() {
+  const st=document.getElementById('sl-status');
+  st.textContent='⏳ Getting location…';
+  if (!navigator.geolocation) { st.textContent='❌ Not supported.'; return; }
+  navigator.geolocation.getCurrentPosition(
+    pos=>{ const lat=pos.coords.latitude, lng=pos.coords.longitude;
+      document.getElementById('sl-coord').value=`${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+      st.textContent=`✅ Got: ${lat.toFixed(4)}, ${lng.toFixed(4)} — click Save`; },
+    ()=>{ st.textContent='❌ Denied.'; }
+  );
+}
+
+function saveSecurity() {
+  const nid=document.getElementById('sc-id').value.trim();
+  const cur=document.getElementById('sc-cur').value;
+  const nw =document.getElementById('sc-new').value;
+  const con=document.getElementById('sc-con').value;
+  const ee=document.getElementById('sc-err'), eo=document.getElementById('sc-ok');
+  ee.style.display='none'; eo.style.display='none';
+  if (cur!==S.adminPassword) { ee.textContent='❌ Current password wrong.'; ee.style.display='block'; return; }
+  if (nw&&nw.length<4) { ee.textContent='❌ New password too short (min 4).'; ee.style.display='block'; return; }
+  if (nw&&nw!==con) { ee.textContent='❌ Passwords do not match.'; ee.style.display='block'; return; }
+  if (nid) S.adminId=nid;
+  if (nw)  S.adminPassword=nw;
+  save(); syncToFirebase(); // Sync credentials too — so all devices get the new password
+  eo.textContent=`✅ Updated & synced to all devices! ID: "${S.adminId}"`;
+  eo.style.display='block';
+  ['sc-id','sc-cur','sc-new','sc-con'].forEach(id=>document.getElementById(id).value='');
+}
+
+// ══════════════════════════════════════════════
+//  PRODUCT MANAGEMENT
+// ══════════════════════════════════════════════
+function renderProdList() {
+  document.getElementById('pl-list').innerHTML = P.length
+    ? P.map((p,i)=>{
+        const avail=p.available!==false;
+        return `<div class="pl-item">
+          <span class="pl-em">${p.e}</span>
+          <div class="pl-inf"><strong>${p.en}</strong><div class="pl-te">${p.te||''}</div><div class="pl-pr">₹${p.p}${p.u}</div></div>
+          <button class="avail-tog ${avail?'on':'off'}" onclick="toggleAvail(${i})">${avail?'✅ In Stock':'❌ Out of Stock'}</button>
+          <button class="edt-b" onclick="editProd(${i})">✏️</button>
+          <button class="del-b" onclick="delProd(${i})">🗑️</button>
+        </div>`;
+      }).join('')
+    : '<p style="color:var(--muted);font-size:.8rem;padding:8px 0">No products yet.</p>';
+}
+
+function toggleAvail(i) {
+  P[i].available = P[i].available===false ? true : false;
+  if (P[i].available===false) delete cart[i];
+  save(); syncToFirebase(); renderProdList(); updateCC(); renderProds();
+}
+
+function renderMasterGrid() {
+  const added = new Set(P.map(p=>p.en));
+  document.getElementById('mgrid').innerHTML = MASTER.map((m,i)=>{
+    const a=added.has(m.en);
+    return `<div class="mg-item${a?' added':''}" onclick="toggleMaster(${i})">
+      <span class="mg-em">${m.e}</span>
+      <div class="mg-en">${m.en}</div>
+      <div class="mg-te">${m.te}</div>
+      ${a?'<div class="mg-added-badge">✓</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function toggleMaster(i) {
+  const m=MASTER[i];
+  const idx=P.findIndex(p=>p.en===m.en);
+  if (idx>=0) { if (!confirm(`Remove "${m.en}"?`)) return; P.splice(idx,1); }
+  else { P.push({...m}); }
+  save(); syncToFirebase(); renderProdList(); renderMasterGrid(); renderProds();
+}
+
+function editProd(i) {
+  const p=P[i];
+  document.getElementById('ei').value=i;
+  document.getElementById('pns').value=p.en;
+  document.getElementById('pe').value=p.e;
+  document.getElementById('pen').value=p.en;
+  document.getElementById('pte').value=p.te||'';
+  document.getElementById('pp').value=p.p;
+  document.getElementById('pu').value=p.u;
+  document.getElementById('apf-title').textContent='✏️ Edit Product';
+  document.getElementById('sp-btn').textContent='💾 Update';
+  document.getElementById('apf-title').scrollIntoView({behavior:'smooth'});
+}
+
+function delProd(i) {
+  if (confirm(`Delete "${P[i].en}"?`)) {
+    P.splice(i,1); save(); syncToFirebase(); renderProdList(); renderMasterGrid(); renderProds();
+  }
+}
+
+function saveProduct() {
+  const en=document.getElementById('pen').value.trim();
+  const te=document.getElementById('pte').value.trim();
+  const e =document.getElementById('pe').value.trim();
+  const p =parseFloat(document.getElementById('pp').value);
+  const u =document.getElementById('pu').value.trim()||'/kg';
+  const ei=parseInt(document.getElementById('ei').value);
+  if (!en||isNaN(p)) { alert('Fill English name and price.'); return; }
+  const prod={e:e||'🥬',en,te,p,u,c:'other'};
+  if (ei>=0) P[ei]=prod; else P.push(prod);
+  save(); syncToFirebase(); renderProdList(); renderMasterGrid(); renderProds();
+  ['ei','pns','pe','pen','pte','pp','pu'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=id==='ei'?'-1':''; });
+  document.getElementById('apf-title').textContent='➕ Add Custom Item';
+  document.getElementById('sp-btn').textContent='➕ Add Product';
+  hideSug();
+}
+
+// ── Auto-suggest ──────────────────────────────
+function onPnSearch(v) {
+  if (!v.trim()) { hideSug(); return; }
+  const vl=v.toLowerCase();
+  const hits=MASTER.filter(m=>m.en.toLowerCase().includes(vl)||m.te.includes(v.trim())).slice(0,5);
+  if (!hits.length) { hideSug(); return; }
+  const box=document.getElementById('sug-box');
+  box.innerHTML=hits.map(m=>`
+    <div class="sug-item" onclick="pickSug(${MASTER.indexOf(m)})">
+      <span>${m.e}</span><span><b>${m.en}</b> <span class="sug-te">${m.te}</span></span>
+      <span style="margin-left:auto;font-size:.7rem;color:var(--muted)">₹${m.p}${m.u}</span>
+    </div>`).join('');
+  box.style.display='block';
+}
+function pickSug(i) {
+  const m=MASTER[i];
+  document.getElementById('pns').value=m.en;
+  document.getElementById('pe').value=m.e;
+  document.getElementById('pen').value=m.en;
+  document.getElementById('pte').value=m.te;
+  if (!document.getElementById('pp').value) document.getElementById('pp').value=m.p;
+  if (!document.getElementById('pu').value) document.getElementById('pu').value=m.u;
+  hideSug();
+}
+function hideSug() { const b=document.getElementById('sug-box'); if(b) b.style.display='none'; }
+document.addEventListener('click',e=>{ if (!e.target.closest('#sug-box')&&e.target.id!=='pns') hideSug(); });
+
+// ══════════════════════════════════════════════
+//  FIREBASE SETTINGS UI
+// ══════════════════════════════════════════════
+async function saveFirebaseUrl() {
+  const url=(document.getElementById('fb-url').value||'').trim().replace(/\/+$/,'');
+  const bar=document.getElementById('fb-status-bar');
+  if (!url) { alert('Please paste your Firebase URL.'); return; }
+  if (location.protocol==='file:') {
+    bar.style.display='block'; bar.style.background='#fff3e0'; bar.style.color='#e65100';
+    bar.textContent='⚠️ URL saved. Open via Netlify for live sync.';
+    S.firebaseUrl=url; save(); return;
+  }
+  bar.style.display='block'; bar.style.background='#e3f2fd'; bar.style.color='#1565c0';
+  bar.textContent='⏳ Syncing…';
+  S.firebaseUrl=url; save();
+  try { await syncToFirebase(); bar.style.background='#e8f5e9'; bar.style.color='#2e7d32'; bar.textContent='✅ Synced to all devices!'; }
+  catch(e) { bar.style.background='#fff3e0'; bar.style.color='#e65100'; bar.textContent='⚠️ URL saved. Check Firebase rules (test mode required).'; }
+}
+async function disconnectFirebase() {
+  if (!confirm('Disconnect? Changes will only save locally.')) return;
+  S.firebaseUrl=''; save();
+  const bar=document.getElementById('fb-status-bar');
+  bar.style.display='block'; bar.style.background='#fff8e1'; bar.style.color='#795548';
+  bar.textContent='🔌 Disconnected.'; document.getElementById('fb-url').value='';
+}
+
+// ══════════════════════════════════════════════
+//  PWA
+// ══════════════════════════════════════════════
+function setupPWA() {
+  const iconSvg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%232e7d32'/><text y='130' x='96' text-anchor='middle' font-size='110'>🌿</text></svg>`;
+  const manifest={name:S.shopName||'Harika Vegetables',short_name:'Veggies',description:'Order fresh vegetables online',start_url:'./',display:'standalone',background_color:'#f1f8e9',theme_color:'#2e7d32',orientation:'portrait',icons:[{src:`data:image/svg+xml,${iconSvg}`,sizes:'192x192',type:'image/svg+xml'},{src:`data:image/svg+xml,${iconSvg}`,sizes:'512x512',type:'image/svg+xml'}]};
+  document.getElementById('pwa-manifest').href='data:application/json,'+encodeURIComponent(JSON.stringify(manifest));
+  if ('serviceWorker' in navigator) {
+    const sw=`const C='veg-v2';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./'])));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res.status===200)caches.open(C).then(c=>c.put(e.request,res.clone()));return res;}).catch(()=>caches.match('./'))));});`;
+    const blob=new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+  }
+}
+let deferredInstallPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;document.getElementById('install-btn').classList.add('show');const nb=document.getElementById('native-install-btn');if(nb)nb.style.display='block';});
+window.addEventListener('appinstalled',()=>{document.getElementById('install-btn').classList.remove('show');deferredInstallPrompt=null;});
+function triggerInstall(){document.getElementById('install-modal').classList.add('open');if(deferredInstallPrompt)document.getElementById('native-install-btn').style.display='block';}
+function closeInstallModal(){document.getElementById('install-modal').classList.remove('open');}
+async function doNativeInstall(){if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();const{outcome}=await deferredInstallPrompt.userChoice;if(outcome==='accepted'){closeInstallModal();document.getElementById('install-btn').classList.remove('show');}deferredInstallPrompt=null;}
+
+// ══════════════════════════════════════════════
+init();
+setupPWA();
+</script>
+</body>
+</html>
